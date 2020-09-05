@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<head>
+  <title>Portal do Luciano Lima</title> 
+</head>
+<!--
+    Tratamento de Eventos WEBSockets no Cliente.
+-->
+<h1>Olá Mundo WEB!</h1>
+<!--
+-->
+<script>
+    function LimparForm(NomeForm) {
+        document.getElementById(NomeForm).reset();
+    }
+</script>
+<!-- -->
+<ul id = "mensagens"> </ul >
+<!-- -->
+<h2>Identifique-se e Envie sua Mensagem:</h2>
+<!-- -->
+<!-- -->
+<form id="comment-form" name="comment-form_PWN">
+<!-- -->
+<fieldset style="background-color: #eeeeee; position:relative; height:auto; width:400px;">
+<legend style="background-color: gray; color: black; padding: 5px 10px;"><b>Mensagens</b></legend> <br> 
+<!-- -->
+<label for="author"><b>Autor: </b></label> <br> <br />
+<input type="text" id="author" name="author" placeholder="Autor" size="50">
+<br />
+<br />
+<!-- -->
+<label for="comment"><b>Comentário: </b></label> <br /> <br />
+<textarea id="comment" name="comment" placeholder="Comentário" cols="50" rows="12"> </textarea>
+<br />
+<br />
+<!-- <button type="Submit">Enviar</button> -->
+<button type="submit">Enviar Mensagem</button>
+<input type="button" onclick="LimparForm('comment-form')" value="Reset Form">
+<!-- -->
+</fieldset>
+<!-- -->
+</form>
+<!-- -->
+<!-- <p><b>Observe que cada campo do Formulário tem o tamanho máximo de 50 caracteres.</b></p>
+-->
+<!-- -->
+<!-- 
+    Conexão Cliente-Sevidor: Importando a biblioteca socket.io para o cliente.
+    Vem do package.json:
+    "name": "nodejs-socket.io", "version": "1.0.0",
+-->
+<script src="/socket.io/socket.io.js"></script>
+<!--
+    Declarando um instância SOCKET.IO na constante socket no localhost:3000 (Servidor).
+-->
+<script type="text/javascript">
+    const socket = io('http://localhost:3000');
+    //
+    // Recebendo a Mensagem do Cliente (String).
+    //
+    socket.on('mensagemDoServidor', content => {
+        alert(content);
+    })
+    //
+    // Emitindo mensagem para o Cliente que abriu a Sessão (String).
+    //
+    socket.emit('mensagemDoCliente', 'Bem-vindo à Página do Luciano Lima');
+    //
+    // Emitindo mensagem do Cliente (Objeto).
+    //
+    socket.emit('mensagemDoClienteObj', {
+        Nome: 'Bem-vindo à Página do Luciano Lima',
+        Tïpo: 'Supervisor do Portal'
+    });
+    //
+    //
+    // Emitindo mensagem para todos Cliente que agriram uma Sessão (String).
+    //
+    // socket.broadcast.emit('mensagemDoCliente', 'Luciano Lima');
+    //
+    // Passo 5 e 6
+    //
+    const ListaMsg = document.getElementById('mensagens');
+    //
+    const renderMSG = (mensagem) => {
+        const itemMSG = document.createElement('li');
+        itemMSG.innerHTML = `<strong>${mensagem.author}</strong>: ${mensagem.comment}`;
+        ListaMsg.append(itemMSG);
+    }
+    const renderUsr = (Usuarios) => {
+        const itemUsr = document.createElement('li');
+        itemUsr.innerHTML = `${Usuarios.quantidade}`;
+        ListaMsg.append(itemUsr);
+    }
+    //
+    // Formulário Onsubimit. Setando o Form na varável.
+    //
+    const FormMSG = document.getElementById('comment-form');
+    //
+    // Implementação Botão Onsubmit.
+    //
+    FormMSG.onsubmit = function(evento) {
+        evento.preventDefault();
+        //
+        const author = document.getElementById('author').value;
+        const comment = document.getElementById('comment').value;
+        const dadoMSG = {author, comment};
+        //
+        // Enviando a Mensagem do Form
+        //
+        renderMSG(dadoMSG);
+        //
+        socket.emit('MSGCliente', dadoMSG);
+    }
+    socket.on('grupoMSG', mensagem => { 
+        renderMSG(mensagem);
+        alert('Você recebeu uma Mensagem'); 
+    });
+    socket.on('usuarioConetado', Usuario => { 
+        renderUsr(Usuario);
+    });
+</script>
